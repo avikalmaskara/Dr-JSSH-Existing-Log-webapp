@@ -1,0 +1,6 @@
+.clasp.json
+.clasprc.json
+credentials*.json
+*.token
+.env
+node_modules/

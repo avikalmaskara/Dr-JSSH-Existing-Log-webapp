@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dr. JSSH Existing Log</title>
+  <style>
+    :root {
+      --bg: #eef6fc;
+      --surface: #ffffff;
+      --primary: #1976d2;
+      --primary-dark: #0d47a1;
+      --primary-soft: #e3f2fd;
+      --primary-line: #bbdefb;
+      --border: #d4e6f5;
+      --text: #1f2d3d;
+      --muted: #5b6b7c;
+      --error: #c62828;
+      --error-soft: #fdecea;
+      --success: #2e7d32;
+      --success-soft: #e8f5e9;
+      --warn: #b26a00;
+      --warn-soft: #fff4e0;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(13, 71, 161, 0.08), 0 4px 14px rgba(13, 71, 161, 0.06);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.45;
+      -webkit-text-size-adjust: 100%;
+    }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    .hidden { display: none !important; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+    /* Buttons */
+    .btn {
+      border: 1px solid transparent; border-radius: 10px; padding: 10px 16px;
+      font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background .15s, box-shadow .15s;
+    }
+    .btn:focus-visible, .chip input:focus-visible + span, .link-btn:focus-visible, .nav-btn:focus-visible {
+      outline: 3px solid #90caf9; outline-offset: 2px;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: #1565c0; }
+    .btn-primary:disabled { background: #90a4ae; cursor: not-allowed; }
+    .btn-outline { background: #fff; color: var(--primary-dark); border-color: var(--primary-line); }
+    .btn-outline:hover { background: var(--primary-soft); }
+    .btn-danger-text { background: none; border: none; color: var(--error); padding: 6px 8px; font-weight: 600; }
+    .btn-lg { padding: 14px 22px; font-size: 16px; width: 100%; }
+    .link-btn { background: none; border: none; color: var(--primary); font-weight: 600; padding: 2px 0; text-decoration: underline; }
+
+    /* Header */
+    .app-header {
+      background: linear-gradient(135deg, #1976d2, #42a5f5);
+      color: #fff; padding: 12px 16px; position: sticky; top: 0; z-index: 20;
+      box-shadow: 0 2px 8px rgba(13, 71, 161, .25);
+    }
+    .header-row { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .brand-title { font-size: 18px; font-weight: 700; margin: 0; }
+    .brand-sub { font-size: 12px; opacity: .9; }
+    .user-box { font-size: 13px; display: flex; gap: 10px; align-items: center; }
+    .user-box .link-btn { color: #fff; }
+    .nav { max-width: 1200px; margin: 10px auto 0; display: flex; gap: 8px; }
+    .nav-btn {
+      background: rgba(255,255,255,.18); color: #fff; border: 1px solid rgba(255,255,255,.35);
+      border-radius: 999px; padding: 7px 18px; font-weight: 600;
+    }
+    .nav-btn[aria-current="page"] { background: #fff; color: var(--primary-dark); }
+
+    main { max-width: 1200px; margin: 0 auto; padding: 16px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+
+    /* Sign-in */
+    .signin-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .signin-card { width: 100%; max-width: 400px; padding: 28px 24px; }
+    .signin-card h1 { margin: 0 0 4px; font-size: 22px; color: var(--primary-dark); }
+    .signin-card p { color: var(--muted); margin: 0 0 18px; }
+
+    /* Form fields */
+    .field { margin-bottom: 16px; }
+    .field > label, .field-label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
+    .req { color: var(--error); }
+    .hint { font-weight: 400; color: var(--muted); font-size: 12.5px; }
+    .text-input {
+      width: 100%; padding: 11px 12px; border: 1px solid #b7cde0; border-radius: 10px; background: #fff;
+    }
+    .text-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(25,118,210,.18); }
+    textarea.text-input { min-height: 70px; resize: vertical; }
+    .field.has-error .text-input, .field.has-error .chips { border-color: var(--error); box-shadow: 0 0 0 2px rgba(198,40,40,.15); }
+    .field.has-error .chips { border-radius: 10px; padding: 4px; border: 1px solid var(--error); }
+    .field-error { color: var(--error); font-size: 13px; margin-top: 4px; }
+    .otp-input { letter-spacing: 8px; font-size: 22px; text-align: center; }
+
+    /* Chips (tap options) */
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { position: relative; }
+    .chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .chip span {
+      display: inline-block; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--primary-line);
+      background: #fff; color: var(--primary-dark); font-weight: 500; cursor: pointer; user-select: none;
+      min-height: 38px;
+    }
+    .chip input:checked + span { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .chip span:hover { background: var(--primary-soft); }
+    .chip input:checked + span:hover { background: #1565c0; }
+    .other-input { margin-top: 8px; }
+
+    /* Qty stepper */
+    .stepper { display: inline-flex; align-items: center; border: 1px solid #b7cde0; border-radius: 10px; overflow: hidden; background: #fff; }
+    .stepper button { width: 44px; height: 44px; border: none; background: var(--primary-soft); color: var(--primary-dark); font-size: 20px; font-weight: 700; }
+    .stepper input { width: 70px; height: 44px; border: none; text-align: center; font-size: 17px; font-weight: 600; }
+    .stepper input:focus { outline: none; }
+
+    /* Entry cards */
+    .page-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .page-head h2 { margin: 0; font-size: 19px; color: var(--primary-dark); }
+    .page-tools { font-size: 13px; color: var(--muted); display: flex; gap: 10px; align-items: center; }
+    .entry-card { padding: 16px; margin-bottom: 14px; }
+    .entry-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px dashed var(--border); padding-bottom: 8px; }
+    .entry-title { font-weight: 700; color: var(--primary-dark); font-size: 16px; }
+    .entry-grid { display: grid; grid-template-columns: 1fr; gap: 0 20px; }
+    @media (min-width: 860px) { .entry-grid { grid-template-columns: 1fr 1fr; } .span-2 { grid-column: span 2; } }
+
+    /* Photos */
+    .photo-instruction {
+      background: var(--warn-soft); border: 1px solid #ffd699; color: #6d4300; border-radius: 10px;
+      padding: 10px 12px; font-size: 13.5px; margin-bottom: 10px;
+    }
+    .photo-instruction b { color: #4e3000; }
+    .photo-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    .photo-buttons .btn { flex: 1 1 140px; }
+    .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+    .photo-tile { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); background: #f4f8fb; aspect-ratio: 1; }
+    .photo-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .photo-status { position: absolute; left: 0; right: 0; bottom: 0; font-size: 11px; font-weight: 700; padding: 3px 6px; text-align: center; }
+    .photo-status.uploading { background: rgba(25,118,210,.9); color: #fff; }
+    .photo-status.saved { background: rgba(46,125,50,.9); color: #fff; }
+    .photo-status.failed { background: rgba(198,40,40,.92); color: #fff; }
+    .photo-remove {
+      position: absolute; top: 4px; right: 4px; width: 28px; height: 28px; border-radius: 50%; border: none;
+      background: rgba(0,0,0,.6); color: #fff; font-size: 16px; line-height: 1;
+    }
+    .photo-retry { position: absolute; top: 4px; left: 4px; border: none; border-radius: 6px; background: #fff; color: var(--error); font-size: 11px; font-weight: 700; padding: 3px 6px; }
+    .photo-fallback { display: flex; align-items: center; justify-content: center; height: 100%; font-size: 12px; color: var(--muted); text-align: center; padding: 6px; }
+
+    /* Submit area + errors */
+    .add-entry { width: 100%; border: 2px dashed var(--primary-line); background: #f7fbff; color: var(--primary-dark); border-radius: var(--radius); padding: 14px; font-weight: 600; margin-bottom: 16px; }
+    .add-entry:hover { background: var(--primary-soft); }
+    .submit-bar { padding: 16px; }
+    .error-block { margin-top: 14px; background: var(--error-soft); border: 1px solid #f5c2c0; border-radius: 10px; padding: 12px 14px; }
+    .error-block h3 { margin: 0 0 6px; font-size: 14px; color: var(--error); }
+    .error-block ol { margin: 0; padding-left: 22px; }
+    .error-block li { margin: 4px 0; }
+    .error-link { background: none; border: none; padding: 0; color: var(--error); text-align: left; text-decoration: underline; }
+    .notice { border-radius: 10px; padding: 10px 12px; font-size: 14px; margin-bottom: 12px; }
+    .notice.error { background: var(--error-soft); color: var(--error); border: 1px solid #f5c2c0; }
+    .notice.success { background: var(--success-soft); color: var(--success); border: 1px solid #c8e6c9; }
+    .notice.info { background: var(--primary-soft); color: var(--primary-dark); border: 1px solid var(--primary-line); }
+
+    /* Full-screen overlays (summary + edit) */
+    .overlay { position: fixed; inset: 0; z-index: 50; background: var(--bg); display: flex; flex-direction: column; }
+    .overlay-head { background: var(--primary); color: #fff; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .overlay-head h2 { margin: 0; font-size: 18px; }
+    .overlay-head .sub { font-size: 13px; opacity: .9; }
+    .overlay-body { flex: 1; overflow: auto; padding: 14px; }
+    .overlay-foot { background: #fff; border-top: 1px solid var(--border); padding: 12px 16px; display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+    .overlay-foot .btn { flex: 1 1 160px; max-width: 280px; }
+    .close-x { background: rgba(255,255,255,.2); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 20px; }
+
+    /* Tables */
+    .table-wrap { overflow: auto; background: #fff; border: 1px solid var(--border); border-radius: var(--radius); }
+    table { border-collapse: collapse; width: 100%; font-size: 14px; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid #e6eff7; text-align: left; vertical-align: top; }
+    th { background: var(--primary-soft); color: var(--primary-dark); font-weight: 700; position: sticky; top: 0; white-space: nowrap; z-index: 1; }
+    tbody tr:nth-child(even) td { background: #f9fcff; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .summary-table td { min-width: 90px; }
+    /* Phones: each summary row becomes a labelled card so nothing hides off-screen to the right. */
+    @media (max-width: 700px) {
+      .summary-wrap { border: none; background: none; overflow: visible; }
+      .summary-table thead { display: none; }
+      .summary-table, .summary-table tbody, .summary-table tr, .summary-table td { display: block; width: 100%; }
+      .summary-table tr { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; box-shadow: var(--shadow); overflow: hidden; }
+      .summary-table td { display: flex; gap: 12px; min-width: 0; padding: 8px 12px; background: #fff !important; }
+      .summary-table td::before { content: attr(data-label); flex: 0 0 110px; font-weight: 700; color: var(--primary-dark); font-size: 13px; }
+      .summary-table td.num { text-align: left; }
+      .summary-table td.row-head { background: var(--primary-soft) !important; font-weight: 700; color: var(--primary-dark); }
+    }
+    .summary-thumbs { display: flex; gap: 4px; flex-wrap: wrap; }
+    .summary-thumbs img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); }
+    .status-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+    .status-existing { background: #e3f2fd; color: #0d47a1; }
+    .status-dismantle { background: #fff4e0; color: #8a5300; }
+    .status-new { background: #e8f5e9; color: #1b5e20; }
+    .photo-link { display: inline-block; margin-right: 6px; color: var(--primary); font-weight: 600; white-space: nowrap; }
+    .muted { color: var(--muted); }
+
+    /* Success */
+    .success-panel { max-width: 560px; margin: 30px auto; padding: 24px; text-align: center; }
+    .success-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--success-soft); color: var(--success); font-size: 34px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; }
+    .logno-list { list-style: none; padding: 0; margin: 14px 0; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .logno-list li { background: var(--primary-soft); color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; font-weight: 700; font-family: Consolas, monospace; }
+
+    /* Dashboard */
+    .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .tile { padding: 12px 14px; }
+    .tile .label { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+    .tile .value { font-size: 24px; font-weight: 700; color: var(--primary-dark); }
+    .tile .small { font-size: 12px; color: var(--muted); }
+    .filters { padding: 12px; margin-bottom: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; }
+    .filters label { font-size: 12.5px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 4px; }
+    .filters .text-input { padding: 9px 10px; }
+    .state-box { padding: 30px; text-align: center; color: var(--muted); }
+    .spinner { width: 28px; height: 28px; border: 3px solid var(--primary-line); border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 10px; }
+    .btn .spinner { width: 16px; height: 16px; border-width: 2px; margin: 0; border-color: rgba(255,255,255,.4); border-top-color: #fff; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .confirm-backdrop { position: fixed; inset: 0; z-index: 90; background: rgba(13, 33, 55, .45); display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .confirm-box { max-width: 360px; width: 100%; padding: 20px; }
+    .confirm-box p { margin: 0 0 16px; font-weight: 600; }
+    .confirm-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: #263238; color: #fff; padding: 10px 18px; border-radius: 10px; z-index: 100; font-size: 14px; box-shadow: var(--shadow); max-width: 90vw; }
+  </style>
+</head>
+<body>
+
+  <!-- Sign-in -->
+  <section id="signinView" class="signin-wrap hidden" aria-labelledby="signinTitle">
+    <div class="card signin-card">
+      <h1 id="signinTitle">Dr. JSSH Existing Log</h1>
+      <p>Eon Sales · sign in with your team email</p>
+      <div id="signinNotice" class="notice hidden" role="alert"></div>
+
+      <form id="emailForm" novalidate>
+        <div class="field">
+          <label for="signinEmail">Email</label>
+          <input id="signinEmail" class="text-input" type="email" autocomplete="email" inputmode="email" placeholder="name@eonsales.in" required>
+        </div>
+        <button id="sendCodeBtn" class="btn btn-primary btn-lg" type="submit">Send code</button>
+      </form>
+
+      <form id="codeForm" class="hidden" novalidate>
+        <p id="codeSentTo" class="muted" style="margin-bottom:12px"></p>
+        <div class="field">
+          <label for="signinCode">6-digit code</label>
+          <input id="signinCode" class="text-input otp-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required>
+        </div>
+        <button id="verifyBtn" class="btn btn-primary btn-lg" type="submit">Verify &amp; sign in</button>
+        <div style="display:flex;justify-content:space-between;margin-top:14px;font-size:14px">
+          <button type="button" id="changeEmailBtn" class="link-btn">Use a different email</button>
+          <button type="button" id="resendBtn" class="link-btn" disabled>Resend code</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Loading (initial) -->
+  <section id="bootView" class="signin-wrap">
+    <div class="state-box"><div class="spinner"></div>Loading…</div>
+  </section>
+
+  <!-- App -->
+  <div id="appView" class="hidden">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-row">
+        <div>
+          <p class="brand-title">Dr. JSSH Existing Log</p>
+          <div class="brand-sub">Eon Sales · AC survey</div>
+        </div>
+        <div class="user-box">
+          <span id="userName"></span>
+          <button type="button" id="signOutBtn" class="link-btn">Sign out</button>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Main">
+        <button type="button" class="nav-btn" data-view="log" aria-current="page">Log</button>
+        <button type="button" class="nav-btn" data-view="dashboard">Dashboard</button>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Log form -->
+      <section id="logView" aria-labelledby="logTitle">
+        <div class="page-head">
+          <h2 id="logTitle">New Log Entry</h2>
+          <div class="page-tools">
+            <span id="areaListStatus"></span>
+            <button type="button" id="refreshAreasBtn" class="link-btn">Refresh list</button>
+          </div>
+        </div>
+        <div id="draftNotice" class="notice info hidden"></div>
+        <datalist id="areaList"></datalist>
+        <div id="entries"></div>
+        <button type="button" id="addEntryBtn" class="add-entry">+ Add another AC</button>
+
+        <!-- Submit -->
+        <div class="card submit-bar">
+          <button type="button" id="reviewBtn" class="btn btn-primary btn-lg">Submit</button>
+          <p class="muted" style="font-size:13px;margin:8px 0 0;text-align:center">You'll see a summary to check before anything is saved. Log No is created after submit.</p>
+          <div id="submitErrors" class="error-block hidden" role="alert" aria-live="assertive"></div>
+        </div>
+      </section>
+
+      <!-- Dashboard -->
+      <section id="dashboardView" class="hidden" aria-labelledby="dashTitle">
+        <div class="page-head">
+          <h2 id="dashTitle">Dashboard</h2>
+          <div class="page-tools">
+            <span id="dashUpdated"></span>
+            <button type="button" id="dashRefreshBtn" class="link-btn">Refresh</button>
+            <button type="button" id="csvBtn" class="btn btn-outline" style="padding:6px 12px">Export CSV</button>
+          </div>
+        </div>
+        <div id="dashTiles" class="tiles"></div>
+        <div class="card filters">
+          <div><label for="fSearch">Search</label><input id="fSearch" class="text-input" type="search" placeholder="Log No, area, remarks…"></div>
+          <div><label for="fFloor">Floor</label><select id="fFloor" class="text-input"></select></div>
+          <div><label for="fStatus">AC Status</label><select id="fStatus" class="text-input"></select></div>
+          <div><label for="fBrand">Brand</label><select id="fBrand" class="text-input"></select></div>
+          <div><label for="fTonnage">Tonnage</label><select id="fTonnage" class="text-input"></select></div>
+          <div><button type="button" id="clearFiltersBtn" class="btn btn-outline" style="width:100%">Clear filters</button></div>
+        </div>
+        <div id="dashBody"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Summary (full screen, before submit) -->
+  <div id="summaryOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="summaryTitle">
+    <div class="overlay-head">
+      <div>
+        <h2 id="summaryTitle">Check before submitting</h2>
+        <div id="summarySub" class="sub"></div>
+      </div>
+      <button type="button" class="close-x" id="summaryCloseBtn" aria-label="Close summary">×</button>
+    </div>
+    <div class="overlay-body" id="summaryBody"></div>
+    <div class="overlay-foot" id="summaryFoot">
+      <button type="button" id="summaryBackBtn" class="btn btn-outline">← Back &amp; edit</button>
+      <button type="button" id="confirmSubmitBtn" class="btn btn-primary">Confirm &amp; Submit</button>
+    </div>
+  </div>
+
+  <!-- Dashboard edit (full screen) -->
+  <div id="editOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+    <div class="overlay-head">
+      <div>
+        <h2 id="editTitle">Edit log</h2>
+        <div id="editSub" class="sub"></div>
+      </div>
+      <button type="button" class="close-x" id="editCloseBtn" aria-label="Close edit">×</button>
+    </div>
+    <div class="overlay-body"><div style="max-width:900px;margin:0 auto" id="editBody"></div></div>
+    <div class="overlay-foot">
+      <button type="button" id="editCancelBtn" class="btn btn-outline">Cancel</button>
+      <button type="button" id="editSaveBtn" class="btn btn-primary">Save changes</button>
+    </div>
+  </div>
+
+  <!-- In-page confirm dialog (browser confirm() is unreliable inside embedded pages) -->
+  <div id="confirmOverlay" class="confirm-backdrop hidden" role="alertdialog" aria-modal="true" aria-labelledby="confirmText">
+    <div class="card confirm-box">
+      <p id="confirmText"></p>
+      <div class="confirm-actions">
+        <button type="button" id="confirmNo" class="btn btn-outline">Cancel</button>
+        <button type="button" id="confirmYes" class="btn btn-primary">Yes</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <script>
+    /* ================================================================
+       Constants & state
+       ================================================================ */
+    const SESSION_KEY = 'jssh_session_v1';
+    const DRAFT_KEY = 'jssh_draft_v1';
+    const NEW_REQUIRED = 'New Required';
+    const OTHER_VALUE = '__other__';
+    const MAX_PHOTOS = 6;
+    const PHOTO_MAX_EDGE = 1280;
+    const PHOTO_TARGET_BYTES = 300 * 1024;
+
+    const FIELD_LABELS = {
+      area: 'Area/Room No', floor: 'Floor', acStatus: 'AC Status', brand: 'Brand',
+      tonnage: 'Tonnage', qty: 'Qty', photos: 'Photo', remarks: 'Remarks'
+    };
+    const FIELD_ORDER = ['area', 'floor', 'acStatus', 'brand', 'tonnage', 'qty', 'photos', 'remarks'];
+
+    const state = {
+      token: null,
+      user: null,
+      options: null,
+      areas: [],
+      entries: [],
+      submissionKey: null,
+      dashboard: { rows: [], loaded: false, loading: false, error: '' },
+      editing: null,
+      editingOriginal: null
+    };
+    // Compressed photo data kept outside state so drafts never store base64 (localStorage quota).
+    const pendingPhotoData = new Map();
+
+    /* ================================================================
+       Utilities
+       ================================================================ */
+    function $(id) { return document.getElementById(id); }
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value).replace(/[&<>"']/g, (c) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+      ));
+    }
+
+    function uid() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
+
+    // Browser storage can be unavailable (private mode, blocked cookies) — never let that break the app.
+    function storageGet(key) {
+      try { return window.localStorage.getItem(key); } catch (err) { return null; }
+    }
+    function storageSet(key, value) {
+      try { window.localStorage.setItem(key, value); } catch (err) { /* ignore */ }
+    }
+    function storageRemove(key) {
+      try { window.localStorage.removeItem(key); } catch (err) { /* ignore */ }
+    }
+
+    let toastTimer = null;
+    function showToast(message) {
+      const toast = $('toast');
+      toast.textContent = message;
+      toast.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.add('hidden'), 3200);
+    }
+
+    function setButtonBusy(button, busy, busyText) {
+      if (busy) {
+        button.dataset.label = button.innerHTML;
+        button.innerHTML = '<span class="spinner"></span>' + escapeHtml(busyText || 'Please wait…');
+        button.disabled = true;
+      } else {
+        if (button.dataset.label) button.innerHTML = button.dataset.label;
+        button.disabled = false;
+      }
+    }
+
+    function driveThumbUrl(fileId) {
+      return 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(fileId) + '&sz=w300';
+    }
+
+    // Promise wrapper around google.script.run. Auth failures sign the user out everywhere.
+    function callServer(functionName, ...args) {
+      return new Promise((resolve, reject) => {
+        google.script.run
+          .withSuccessHandler((response) => {
+            if (response && response.authFailed) {
+              handleAuthFailure(response.error);
+              reject(new Error(response.error));
+              return;
+            }
+            resolve(response || { success: false, error: 'Empty response from server.' });
+          })
+          .withFailureHandler((err) => {
+            reject(new Error(err && err.message ? err.message : 'Network error — check your connection and try again.'));
+          })[functionName](...args);
+      });
+    }
+
+    function askConfirm(message, yesLabel) {
+      return new Promise((resolve) => {
+        const overlay = $('confirmOverlay');
+        $('confirmText').textContent = message;
+        $('confirmYes').textContent = yesLabel || 'Yes';
+        overlay.classList.remove('hidden');
+        $('confirmYes').focus();
+        const finish = (answer) => {
+          overlay.classList.add('hidden');
+          $('confirmYes').onclick = null;
+          $('confirmNo').onclick = null;
+          resolve(answer);
+        };
+        $('confirmYes').onclick = () => finish(true);
+        $('confirmNo').onclick = () => finish(false);
+      });
+    }
+
+    function showNotice(element, type, message) {
+      element.className = 'notice ' + type;
+      element.textContent = message;
+      element.classList.remove('hidden');
+    }
+
+    /* ================================================================
+       Sign-in
+       ================================================================ */
+    let pendingEmail = '';
+    let resendTimer = null;
+
+    function showSignIn(message) {
+      $('bootView').classList.add('hidden');
+      $('appView').classList.add('hidden');
+      $('signinView').classList.remove('hidden');
+      $('emailForm').classList.remove('hidden');
+      $('codeForm').classList.add('hidden');
+      if (message) showNotice($('signinNotice'), 'error', message);
+      else $('signinNotice').classList.add('hidden');
+      setTimeout(() => $('signinEmail').focus(), 50);
+    }
+
+    function startResendCountdown(seconds) {
+      const button = $('resendBtn');
+      let remaining = seconds;
+      button.disabled = true;
+      clearInterval(resendTimer);
+      const tick = () => {
+        if (remaining <= 0) {
+          clearInterval(resendTimer);
+          button.disabled = false;
+          button.textContent = 'Resend code';
+          return;
+        }
+        button.textContent = 'Resend in ' + remaining + 's';
+        remaining -= 1;
+      };
+      tick();
+      resendTimer = setInterval(tick, 1000);
+    }
+
+    async function sendCode(event) {
+      if (event) event.preventDefault();
+      const email = $('signinEmail').value.trim().toLowerCase();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        showNotice($('signinNotice'), 'error', 'Enter a valid email address.');
+        $('signinEmail').focus();
+        return;
+      }
+      setButtonBusy($('sendCodeBtn'), true, 'Sending…');
+      try {
+        const response = await callServer('requestOtp', email);
+        if (!response.success) {
+          showNotice($('signinNotice'), 'error', response.error);
+          return;
+        }
+        pendingEmail = email;
+        $('emailForm').classList.add('hidden');
+        $('codeForm').classList.remove('hidden');
+        $('codeSentTo').textContent = 'We emailed a 6-digit code to ' + email + '.';
+        showNotice($('signinNotice'), 'success', 'Code sent. Check your inbox (and spam).');
+        $('signinCode').value = '';
+        $('signinCode').focus();
+        startResendCountdown(response.resendAfterSeconds || 45);
+      } catch (err) {
+        showNotice($('signinNotice'), 'error', err.message);
+      } finally {
+        setButtonBusy($('sendCodeBtn'), false);
+      }
+    }
+
+    async function verifyCode(event) {
+      event.preventDefault();
+      const code = $('signinCode').value.replace(/\D/g, '');
+      if (code.length !== 6) {
+        showNotice($('signinNotice'), 'error', 'Enter the 6-digit code from the email.');
+        $('signinCode').focus();
+        return;
+      }
+      setButtonBusy($('verifyBtn'), true, 'Checking…');
+      try {
+        const response = await callServer('verifyOtp', pendingEmail, code);
+        if (!response.success) {
+          showNotice($('signinNotice'), 'error', response.error);
+          return;
+        }
+        state.token = response.token;
+        storageSet(SESSION_KEY, JSON.stringify({ token: response.token, user: response.user }));
+        $('signinView').classList.add('hidden');
+        $('bootView').classList.remove('hidden');
+        await loadApp();
+      } catch (err) {
+        showNotice($('signinNotice'), 'error', err.message);
+      } finally {
+        setButtonBusy($('verifyBtn'), false);
+      }
+    }
+
+    function signOut() {
+      storageRemove(SESSION_KEY);
+      state.token = null;
+      state.user = null;
+      showSignIn();
+    }
+
+    function handleAuthFailure(message) {
+      storageRemove(SESSION_KEY);
+      state.token = null;
+      $('summaryOverlay').classList.add('hidden');
+      $('editOverlay').classList.add('hidden');
+      showSignIn(message || 'Please sign in again.');
+    }
+
+    /* ================================================================
+       App bootstrap
+       ================================================================ */
+    async function loadApp() {
+      try {
+        const response = await callServer('getBootstrap', state.token);
+        if (!response.success) {
+          $('bootView').innerHTML = '<div class="state-box"><p class="notice error">' + escapeHtml(response.error) +
+            '</p><button class="btn btn-primary" onclick="location.reload()">Try again</button></div>';
+          return;
+        }
+        state.user = response.user;
+        state.options = response.options;
+        setAreaList(response.areas);
+        $('userName').textContent = response.user.name;
+        $('bootView').classList.add('hidden');
+        $('appView').classList.remove('hidden');
+        restoreDraftOrStartFresh();
+        populateFilterSelects();
+      } catch (err) {
+        if (!state.token) return; // auth failure already showed the sign-in screen
+        $('bootView').innerHTML = '<div class="state-box"><p class="notice error">' + escapeHtml(err.message) +
+          '</p><button class="btn btn-primary" onclick="location.reload()">Try again</button></div>';
+      }
+    }
+
+    function setAreaList(areas) {
+      state.areas = Array.isArray(areas) ? areas : [];
+      $('areaList').innerHTML = state.areas.map((a) => '<option value="' + escapeHtml(a) + '"></option>').join('');
+    }
+
+    async function refreshAreaList() {
+      const status = $('areaListStatus');
+      status.textContent = 'Refreshing…';
+      try {
+        const response = await callServer('getAreaList', state.token);
+        if (!response.success) throw new Error(response.error);
+        setAreaList(response.areas);
+        status.textContent = 'List updated (' + state.areas.length + ' areas)';
+      } catch (err) {
+        status.textContent = 'Could not refresh: ' + err.message;
+      }
+    }
+
+    function switchView(view) {
+      document.querySelectorAll('.nav-btn').forEach((b) => {
+        if (b.dataset.view === view) b.setAttribute('aria-current', 'page');
+        else b.removeAttribute('aria-current');
+      });
+      $('logView').classList.toggle('hidden', view !== 'log');
+      $('dashboardView').classList.toggle('hidden', view !== 'dashboard');
+      window.scrollTo(0, 0);
+      if (view === 'dashboard') loadDashboard();
+    }
+
+    /* ================================================================
+       Entries (log form state)
+       ================================================================ */
+    function newEntry() {
+      return {
+        id: uid(), area: '', floor: '', acStatus: '', brand: '', tonnage: '', qty: 1,
+        remarks: '', photos: [], other: {}
+      };
+    }
+
+    function findEntry(entryId) {
+      if (state.editing && state.editing.id === entryId) return state.editing;
+      return state.entries.find((e) => e.id === entryId) || null;
+    }
+
+    function restoreDraftOrStartFresh() {
+      state.entries = [];
+      const raw = storageGet(DRAFT_KEY);
+      if (raw) {
+        try {
+          const draft = JSON.parse(raw);
+          if (draft && Array.isArray(draft.entries) && draft.entries.length && draft.email === state.user.email) {
+            state.entries = draft.entries.map((e) => Object.assign(newEntry(), e, {
+              photos: (e.photos || []).map((p) => ({ localId: uid(), fileId: p.fileId, url: p.url, preview: '', status: 'saved' }))
+            }));
+            showNotice($('draftNotice'), 'info', 'Your unsaved entries were restored.');
+          }
+        } catch (err) {
+          storageRemove(DRAFT_KEY);
+        }
+      }
+      if (!state.entries.length) {
+        state.entries = [newEntry()];
+        $('draftNotice').classList.add('hidden');
+      }
+      renderEntries();
+    }
+
+    let draftTimer = null;
+    function saveDraftSoon() {
+      clearTimeout(draftTimer);
+      draftTimer = setTimeout(() => {
+        const entries = state.entries.map((e) => ({
+          id: e.id, area: e.area, floor: e.floor, acStatus: e.acStatus, brand: e.brand,
+          tonnage: e.tonnage, qty: e.qty, remarks: e.remarks, other: e.other,
+          photos: e.photos.filter((p) => p.status === 'saved').map((p) => ({ fileId: p.fileId, url: p.url }))
+        }));
+        storageSet(DRAFT_KEY, JSON.stringify({ email: state.user ? state.user.email : '', entries: entries }));
+      }, 400);
+    }
+
+    /* ---------- Rendering one entry (also reused by the dashboard edit screen) ---------- */
+    function chipGroupHtml(entry, field, options, allowOther) {
+      const value = entry[field];
+      const isOther = allowOther && (entry.other[field] || (value && options.indexOf(value) === -1));
+      const name = field + '-' + entry.id;
+      let html = '<div class="chips" role="radiogroup" aria-label="' + FIELD_LABELS[field] + '">';
+      options.forEach((option) => {
+        const checked = !isOther && value === option ? ' checked' : '';
+        html += '<label class="chip"><input type="radio" name="' + name + '" value="' + escapeHtml(option) + '"' +
+          ' data-entry="' + entry.id + '" data-field="' + field + '"' + checked + '><span>' + escapeHtml(option) + '</span></label>';
+      });
+      if (allowOther) {
+        html += '<label class="chip"><input type="radio" name="' + name + '" value="' + OTHER_VALUE + '"' +
+          ' data-entry="' + entry.id + '" data-field="' + field + '"' + (isOther ? ' checked' : '') + '><span>Other…</span></label>';
+      }
+      html += '</div>';
+      if (allowOther) {
+        html += '<input type="text" class="text-input other-input' + (isOther ? '' : ' hidden') + '"' +
+          ' data-entry="' + entry.id + '" data-field="' + field + '" data-other="1"' +
+          ' aria-label="Type ' + FIELD_LABELS[field] + '" placeholder="Type ' + FIELD_LABELS[field].toLowerCase() + '"' +
+          ' maxlength="50" value="' + (isOther ? escapeHtml(value) : '') + '">';
+      }
+      return html;
+    }
+
+    function entryFieldsHtml(entry) {
+      const opts = state.options;
+      const brandOptional = entry.acStatus === NEW_REQUIRED;
+      const photoOptional = entry.acStatus === NEW_REQUIRED;
+      return '' +
+        '<div class="entry-grid">' +
+          '<div class="field" data-field-wrap="area">' +
+            '<label for="area-' + entry.id + '">Area / Room No <span class="req">*</span></label>' +
+            '<input id="area-' + entry.id + '" class="text-input" list="areaList" autocomplete="off" maxlength="100"' +
+            ' data-entry="' + entry.id + '" data-field="area" placeholder="e.g. OPD Room 12" value="' + escapeHtml(entry.area) + '">' +
+          '</div>' +
+          '<div class="field" data-field-wrap="qty">' +
+            '<label for="qty-' + entry.id + '">Qty <span class="req">*</span></label>' +
+            '<div class="stepper">' +
+              '<button type="button" data-step="-1" data-entry="' + entry.id + '" aria-label="Decrease quantity">−</button>' +
+              '<input id="qty-' + entry.id + '" type="number" inputmode="numeric" min="1" max="999" step="1"' +
+              ' data-entry="' + entry.id + '" data-field="qty" value="' + escapeHtml(entry.qty) + '">' +
+              '<button type="button" data-step="1" data-entry="' + entry.id + '" aria-label="Increase quantity">+</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="field span-2" data-field-wrap="floor">' +
+            '<span class="field-label">Floor <span class="req">*</span></span>' + chipGroupHtml(entry, 'floor', opts.floors, true) +
+          '</div>' +
+          '<div class="field span-2" data-field-wrap="acStatus">' +
+            '<span class="field-label">AC Status <span class="req">*</span></span>' + chipGroupHtml(entry, 'acStatus', opts.acStatus, false) +
+          '</div>' +
+          '<div class="field span-2" data-field-wrap="brand">' +
+            '<span class="field-label">Brand ' + (brandOptional ? '<span class="hint">(optional for New Required)</span>' : '<span class="req">*</span>') + '</span>' +
+            chipGroupHtml(entry, 'brand', opts.brands, true) +
+          '</div>' +
+          '<div class="field span-2" data-field-wrap="tonnage">' +
+            '<span class="field-label">Tonnage <span class="req">*</span></span>' + chipGroupHtml(entry, 'tonnage', opts.tonnage, true) +
+          '</div>' +
+          '<div class="field span-2" data-field-wrap="photos">' +
+            '<span class="field-label">Photo ' + (photoOptional ? '<span class="hint">(optional for New Required)</span>' : '<span class="req">*</span>') +
+            ' <span class="hint">up to ' + MAX_PHOTOS + '</span></span>' +
+            '<div class="photo-instruction"><b>📷 Photo instructions:</b> Take the photo of the AC\'s <b>rating sticker / nameplate</b> so the ' +
+            '<b>Serial Number is clearly visible and readable</b>. Hold the phone steady, avoid glare, and fill the frame with the sticker. ' +
+            'Add a second photo of the full unit if useful.</div>' +
+            '<div class="photo-buttons">' +
+              '<button type="button" class="btn btn-outline" data-pick="library" data-entry="' + entry.id + '">🖼️ From Library</button>' +
+              '<button type="button" class="btn btn-outline" data-pick="camera" data-entry="' + entry.id + '">📷 Click Photo</button>' +
+            '</div>' +
+            '<input type="file" accept="image/*" multiple class="hidden" data-file="library" data-entry="' + entry.id + '">' +
+            '<input type="file" accept="image/*" capture="environment" class="hidden" data-file="camera" data-entry="' + entry.id + '">' +
+            '<div class="photo-grid" id="photos-' + entry.id + '">' + photoTilesHtml(entry) + '</div>' +
+          '</div>' +
+          '<div class="field span-2" data-field-wrap="remarks">' +
+            '<label for="remarks-' + entry.id + '">Remarks</label>' +
+            '<textarea id="remarks-' + entry.id + '" class="text-input" maxlength="1000" data-entry="' + entry.id + '" data-field="remarks"' +
+            ' placeholder="Type any remarks">' + escapeHtml(entry.remarks) + '</textarea>' +
+          '</div>' +
+        '</div>';
+    }
+
+    function photoTilesHtml(entry) {
+      return entry.photos.map((photo) => {
+        const src = photo.preview || (photo.fileId ? driveThumbUrl(photo.fileId) : '');
+        const labels = { compressing: 'Compressing…', uploading: 'Uploading…', saved: 'Saved ✓', failed: 'Failed' };
+        const statusClass = photo.status === 'saved' ? 'saved' : photo.status === 'failed' ? 'failed' : 'uploading';
+        return '<div class="photo-tile">' +
+          (src ? '<img src="' + escapeHtml(src) + '" alt="AC photo" onerror="this.outerHTML=\'<div class=&quot;photo-fallback&quot;>Photo saved</div>\'">' : '<div class="photo-fallback">Photo</div>') +
+          '<div class="photo-status ' + statusClass + '">' + labels[photo.status] + '</div>' +
+          (photo.status === 'failed' ? '<button type="button" class="photo-retry" data-retry="' + photo.localId + '" data-entry="' + entry.id + '">Retry</button>' : '') +
+          '<button type="button" class="photo-remove" data-remove-photo="' + photo.localId + '" data-entry="' + entry.id + '" aria-label="Remove photo">×</button>' +
+          '</div>';
+      }).join('');
+    }
+
+    function renderPhotos(entry) {
+      const grid = $('photos-' + entry.id);
+      if (grid) grid.innerHTML = photoTilesHtml(entry);
+    }
+
+    function renderEntries() {
+      const container = $('entries');
+      container.innerHTML = state.entries.map((entry, index) => (
+        '<article class="card entry-card" id="entry-' + entry.id + '" aria-label="AC ' + (index + 1) + '">' +
+          '<div class="entry-head"><span class="entry-title">AC ' + (index + 1) + '</span>' +
+          (state.entries.length > 1 ? '<button type="button" class="btn-danger-text" data-remove-entry="' + entry.id + '">Remove</button>' : '') +
+          '</div>' + entryFieldsHtml(entry) +
+        '</article>'
+      )).join('');
+    }
+
+    // Re-renders one card in place (needed when AC Status flips required/optional labels).
+    function rerenderEntry(entry) {
+      if (state.editing && entry.id === state.editing.id) {
+        $('editFields').innerHTML = entryFieldsHtml(entry);
+        return;
+      }
+      const card = $('entry-' + entry.id);
+      if (!card) return;
+      const head = card.querySelector('.entry-head').outerHTML;
+      card.innerHTML = head + entryFieldsHtml(entry);
+    }
+
+    /* ---------- Event handling shared by the log form and the edit screen ---------- */
+    function handleFieldInput(event) {
+      const target = event.target;
+      const entryId = target.dataset.entry;
+      const field = target.dataset.field;
+      if (!entryId || !field) return;
+      const entry = findEntry(entryId);
+      if (!entry) return;
+
+      if (target.type === 'radio') {
+        if (target.value === OTHER_VALUE) {
+          entry.other[field] = true;
+          const otherInput = target.closest('.field').querySelector('[data-other]');
+          otherInput.classList.remove('hidden');
+          entry[field] = otherInput.value.trim();
+          otherInput.focus();
+        } else {
+          entry.other[field] = false;
+          entry[field] = target.value;
+          const otherInput = target.closest('.field').querySelector('[data-other]');
+          if (otherInput) { otherInput.classList.add('hidden'); otherInput.value = ''; }
+        }
+        if (field === 'acStatus') rerenderEntry(entry);
+      } else if (field === 'qty') {
+        entry.qty = target.value === '' ? '' : Number(target.value);
+      } else {
+        entry[field] = target.value;
+      }
+      clearFieldError(target);
+      if (entry !== state.editing) saveDraftSoon();
+    }
+
+    function clearFieldError(element) {
+      const wrap = element.closest('[data-field-wrap]');
+      if (!wrap || !wrap.classList.contains('has-error')) return;
+      wrap.classList.remove('has-error');
+      const message = wrap.querySelector('.field-error');
+      if (message) message.remove();
+    }
+
+    function handleClick(event) {
+      const target = event.target.closest('button');
+      if (!target) return;
+      const entryId = target.dataset.entry;
+
+      if (target.dataset.step) {
+        const entry = findEntry(entryId);
+        const current = Number(entry.qty) || 0;
+        entry.qty = Math.min(999, Math.max(1, current + Number(target.dataset.step)));
+        target.parentElement.querySelector('input').value = entry.qty;
+        clearFieldError(target);
+        if (entry !== state.editing) saveDraftSoon();
+      } else if (target.dataset.pick) {
+        const entry = findEntry(entryId);
+        if (entry.photos.length >= MAX_PHOTOS) { showToast('Maximum ' + MAX_PHOTOS + ' photos per AC.'); return; }
+        const scope = target.closest('.field');
+        scope.querySelector('input[data-file="' + target.dataset.pick + '"]').click();
+      } else if (target.dataset.removePhoto) {
+        removePhoto(findEntry(entryId), target.dataset.removePhoto);
+      } else if (target.dataset.retry) {
+        const entry = findEntry(entryId);
+        const photo = entry.photos.find((p) => p.localId === target.dataset.retry);
+        if (photo) uploadPhotoForEntry(entry, photo);
+      } else if (target.dataset.removeEntry) {
+        removeEntry(target.dataset.removeEntry);
+      }
+    }
+
+    function handleFileChange(event) {
+      const input = event.target;
+      if (!input.dataset.file) return;
+      const entry = findEntry(input.dataset.entry);
+      const files = Array.from(input.files || []);
+      input.value = '';
+      const room = MAX_PHOTOS - entry.photos.length;
+      if (files.length > room) showToast('Only ' + room + ' more photo(s) allowed for this AC.');
+      files.slice(0, room).forEach((file) => addPhoto(entry, file));
+    }
+
+    async function removeEntry(entryId) {
+      const entry = state.entries.find((e) => e.id === entryId);
+      if (!entry) return;
+      const hasData = entry.area || entry.floor || entry.acStatus || entry.photos.length;
+      if (hasData && !(await askConfirm('Remove this AC entry?', 'Remove'))) return;
+      entry.photos.forEach((p) => { if (p.fileId) callServer('deletePhoto', state.token, p.fileId).catch(() => {}); });
+      state.entries = state.entries.filter((e) => e.id !== entryId);
+      renderEntries();
+      saveDraftSoon();
+    }
+
+    /* ================================================================
+       Photos: compress in the browser, upload straight away
+       ================================================================ */
+    function loadImage(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const image = new Image();
+        image.onload = () => { URL.revokeObjectURL(url); resolve(image); };
+        image.onerror = () => { URL.revokeObjectURL(url); reject(new Error('This file is not a readable image.')); };
+        image.src = url;
+      });
+    }
+
+    // Shrinks to ≤1280 px and re-encodes as JPEG, stepping quality down until ≈300 KB.
+    // 1280 px keeps a nameplate serial number legible while cutting a 4–8 MB phone photo to ~150–300 KB.
+    async function compressImage(file) {
+      const image = await loadImage(file);
+      let edge = PHOTO_MAX_EDGE;
+      let quality = 0.65;
+      let dataUrl = '';
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        const scale = Math.min(1, edge / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(image.naturalWidth * scale);
+        canvas.height = Math.round(image.naturalHeight * scale);
+        const context = canvas.getContext('2d');
+        context.fillStyle = '#fff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        dataUrl = canvas.toDataURL('image/jpeg', quality);
+        const approxBytes = Math.round((dataUrl.length - 23) * 0.75);
+        if (approxBytes <= PHOTO_TARGET_BYTES) break;
+        if (quality > 0.45) quality -= 0.1; else edge = Math.round(edge * 0.85);
+      }
+      return dataUrl;
+    }
+
+    async function addPhoto(entry, file) {
+      const photo = { localId: uid(), fileId: null, url: null, preview: '', status: 'compressing' };
+      entry.photos.push(photo);
+      renderPhotos(entry);
+      clearFieldError($('photos-' + entry.id));
+      try {
+        const dataUrl = await compressImage(file);
+        photo.preview = dataUrl;
+        pendingPhotoData.set(photo.localId, dataUrl);
+        await uploadPhotoForEntry(entry, photo);
+      } catch (err) {
+        photo.status = 'failed';
+        renderPhotos(entry);
+        showToast(err.message);
+      }
+    }
+
+    async function uploadPhotoForEntry(entry, photo) {
+      const dataUrl = pendingPhotoData.get(photo.localId);
+      if (!dataUrl) { photo.status = 'failed'; renderPhotos(entry); return; }
+      photo.status = 'uploading';
+      renderPhotos(entry);
+      try {
+        const response = await callServer('uploadPhoto', state.token, { base64: dataUrl, mimeType: 'image/jpeg' });
+        if (!response.success) throw new Error(response.error);
+        // The entry may have been removed while uploading.
+        if (!entry.photos.includes(photo)) {
+          callServer('deletePhoto', state.token, response.fileId).catch(() => {});
+          return;
+        }
+        photo.fileId = response.fileId;
+        photo.url = response.url;
+        photo.status = 'saved';
+        pendingPhotoData.delete(photo.localId);
+        if (response.sharingWarning) showToast(response.sharingWarning);
+      } catch (err) {
+        photo.status = 'failed';
+        showToast('Photo upload failed: ' + err.message);
+      }
+      renderPhotos(entry);
+      if (entry !== state.editing) saveDraftSoon();
+    }
+
+    function removePhoto(entry, localId) {
+      const photo = entry.photos.find((p) => p.localId === localId);
+      if (!photo) return;
+      entry.photos = entry.photos.filter((p) => p !== photo);
+      pendingPhotoData.delete(localId);
+      // Photos already on a saved log are only unlinked; the Drive file is kept as a record.
+      if (photo.fileId && !photo.existing) callServer('deletePhoto', state.token, photo.fileId).catch(() => {});
+      renderPhotos(entry);
+      if (entry !== state.editing) saveDraftSoon();
+    }
+
+    /* ================================================================
+       Validation + error list under Submit
+       ================================================================ */
+    function validateEntry(entry) {
+      const errors = [];
+      const isNew = entry.acStatus === NEW_REQUIRED;
+      if (!String(entry.area).trim()) errors.push({ field: 'area', message: 'Enter the Area / Room No.' });
+      if (!String(entry.floor).trim()) errors.push({ field: 'floor', message: entry.other.floor ? 'Type the floor.' : 'Select a floor.' });
+      if (!entry.acStatus) errors.push({ field: 'acStatus', message: 'Select an AC status.' });
+      if (!isNew && !String(entry.brand).trim()) errors.push({ field: 'brand', message: entry.other.brand ? 'Type the brand.' : 'Select a brand.' });
+      if (!String(entry.tonnage).trim()) errors.push({ field: 'tonnage', message: entry.other.tonnage ? 'Type the tonnage.' : 'Select a tonnage.' });
+      const qty = Number(entry.qty);
+      if (!Number.isInteger(qty) || qty < 1 || qty > 999) errors.push({ field: 'qty', message: 'Qty must be a whole number from 1 to 999.' });
+      if (entry.photos.some((p) => p.status === 'compressing' || p.status === 'uploading')) {
+        errors.push({ field: 'photos', message: 'A photo is still uploading — wait a moment.' });
+      } else if (entry.photos.some((p) => p.status === 'failed')) {
+        errors.push({ field: 'photos', message: 'A photo failed to upload — tap Retry or remove it.' });
+      } else if (!isNew && !entry.photos.length) {
+        errors.push({ field: 'photos', message: 'Add at least one photo with the serial number visible.' });
+      }
+      return errors;
+    }
+
+    function markFieldErrors(root, scopeToEntryCards, errors) {
+      root.querySelectorAll('.has-error').forEach((el) => el.classList.remove('has-error'));
+      root.querySelectorAll('.field-error').forEach((el) => el.remove());
+      errors.forEach((err) => {
+        const scope = scopeToEntryCards ? $('entry-' + err.entryId) || root : root;
+        const wrap = scope && scope.querySelector('[data-field-wrap="' + err.field + '"]');
+        if (!wrap) return;
+        wrap.classList.add('has-error');
+        if (!wrap.querySelector('.field-error')) {
+          const message = document.createElement('div');
+          message.className = 'field-error';
+          message.textContent = err.message;
+          wrap.appendChild(message);
+        }
+      });
+    }
+
+    function collectAllErrors() {
+      const all = [];
+      state.entries.forEach((entry, index) => {
+        validateEntry(entry).forEach((err) => all.push(Object.assign({ entryId: entry.id, entryIndex: index }, err)));
+      });
+      return all;
+    }
+
+    function renderSubmitErrors(errors, heading) {
+      const block = $('submitErrors');
+      if (!errors.length) { block.classList.add('hidden'); block.innerHTML = ''; return; }
+      const multiple = state.entries.length > 1;
+      block.innerHTML = '<h3>' + escapeHtml(heading || ('Can\'t submit yet — ' + errors.length + ' thing' + (errors.length > 1 ? 's' : '') + ' to fix:')) + '</h3><ol>' +
+        errors.map((err) => {
+          const prefix = (multiple && err.entryId ? 'AC ' + (err.entryIndex + 1) + ' — ' : '') + (FIELD_LABELS[err.field] ? FIELD_LABELS[err.field] + ': ' : '');
+          return '<li><button type="button" class="error-link" data-jump-entry="' + (err.entryId || '') + '" data-jump-field="' + (err.field || '') + '">' +
+            escapeHtml(prefix + err.message) + '</button></li>';
+        }).join('') + '</ol>';
+      block.classList.remove('hidden');
+      markFieldErrors($('entries'), true, errors);
+    }
+
+    function jumpToField(entryId, field) {
+      const card = $('entry-' + entryId);
+      if (!card) return;
+      const wrap = card.querySelector('[data-field-wrap="' + field + '"]') || card;
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const focusable = wrap.querySelector('input:not([type=file]):not(.hidden), textarea, button');
+      if (focusable) setTimeout(() => focusable.focus({ preventScroll: true }), 350);
+    }
+
+    /* ================================================================
+       Summary (full screen) → submit
+       ================================================================ */
+    function statusPill(status) {
+      const cls = status === NEW_REQUIRED ? 'status-new' : /dismantle/i.test(status) ? 'status-dismantle' : 'status-existing';
+      return status ? '<span class="status-pill ' + cls + '">' + escapeHtml(status) + '</span>' : '<span class="muted">—</span>';
+    }
+
+    function openSummary() {
+      const errors = collectAllErrors();
+      if (errors.length) { renderSubmitErrors(errors); return; }
+      renderSubmitErrors([]);
+      state.submissionKey = uid() + uid();
+
+      const totalQty = state.entries.reduce((sum, e) => sum + Number(e.qty), 0);
+      $('summarySub').textContent = state.entries.length + ' AC entr' + (state.entries.length > 1 ? 'ies' : 'y') + ' · total qty ' + totalQty;
+      $('summaryBody').innerHTML =
+        '<div class="table-wrap summary-wrap"><table class="summary-table"><thead><tr>' +
+        '<th>#</th><th>Area / Room No</th><th>Floor</th><th>AC Status</th><th>Brand</th><th>Tonnage</th><th>Qty</th><th>Photo</th><th>Remarks</th><th>Edit</th>' +
+        '</tr></thead><tbody>' +
+        state.entries.map((entry, index) => (
+          '<tr>' +
+            '<td class="row-head" data-label="AC">' + (index + 1) + '</td>' +
+            '<td data-label="Area / Room">' + escapeHtml(entry.area) + '</td>' +
+            '<td data-label="Floor">' + escapeHtml(entry.floor) + '</td>' +
+            '<td data-label="AC Status">' + statusPill(entry.acStatus) + '</td>' +
+            '<td data-label="Brand">' + (entry.brand ? escapeHtml(entry.brand) : '<span class="muted">—</span>') + '</td>' +
+            '<td data-label="Tonnage">' + escapeHtml(entry.tonnage) + '</td>' +
+            '<td class="num" data-label="Qty">' + escapeHtml(entry.qty) + '</td>' +
+            '<td data-label="Photo"><div class="summary-thumbs">' + (entry.photos.length
+              ? entry.photos.map((p) => '<img alt="AC photo" src="' + escapeHtml(p.preview || driveThumbUrl(p.fileId)) + '">').join('')
+              : '<span class="muted">None</span>') + '</div></td>' +
+            '<td data-label="Remarks">' + (entry.remarks ? escapeHtml(entry.remarks) : '<span class="muted">—</span>') + '</td>' +
+            '<td data-label=""><button type="button" class="btn btn-outline" style="padding:6px 12px" data-summary-edit="' + entry.id + '">✏️ Edit</button></td>' +
+          '</tr>'
+        )).join('') +
+        '</tbody></table></div>' +
+        '<p class="muted" style="font-size:13px;margin-top:10px">Log numbers (JSSH/…) are created when you tap Confirm &amp; Submit — one per row.</p>' +
+        '<div id="summaryError" class="notice error hidden" role="alert"></div>';
+      $('summaryFoot').classList.remove('hidden');
+      $('summaryOverlay').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      $('confirmSubmitBtn').focus();
+    }
+
+    function closeSummary(focusEntryId) {
+      $('summaryOverlay').classList.add('hidden');
+      document.body.style.overflow = '';
+      if (focusEntryId) {
+        const card = $('entry-' + focusEntryId);
+        if (card) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const firstInput = card.querySelector('input.text-input');
+          if (firstInput) setTimeout(() => firstInput.focus({ preventScroll: true }), 350);
+        }
+      }
+    }
+
+    function entryPayload(entry) {
+      return {
+        area: entry.area, floor: entry.floor, acStatus: entry.acStatus, brand: entry.brand,
+        tonnage: entry.tonnage, qty: Number(entry.qty), remarks: entry.remarks,
+        photos: entry.photos.map((p) => ({ fileId: p.fileId }))
+      };
+    }
+
+    async function confirmSubmit() {
+      const button = $('confirmSubmitBtn');
+      setButtonBusy(button, true, 'Submitting…');
+      $('summaryBackBtn').disabled = true;
+      try {
+        const response = await callServer('submitLog', state.token, {
+          submissionKey: state.submissionKey,
+          entries: state.entries.map(entryPayload)
+        });
+        if (!response.success) {
+          if (response.fieldErrors && response.fieldErrors.length) {
+            closeSummary();
+            renderSubmitErrors(response.fieldErrors.map((err) => Object.assign({}, err, {
+              entryId: state.entries[err.entryIndex] ? state.entries[err.entryIndex].id : ''
+            })), 'The server rejected the submission — please fix:');
+            $('submitErrors').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } else {
+            showNotice($('summaryError'), 'error', response.error + ' Nothing was lost — tap Confirm & Submit to try again.');
+          }
+          return;
+        }
+        showSubmitSuccess(response.logNos);
+      } catch (err) {
+        if (!state.token) return;
+        // Same submissionKey on retry, so a request that actually reached the server is never logged twice.
+        showNotice($('summaryError'), 'error', err.message + ' Nothing was lost — tap Confirm & Submit to try again.');
+      } finally {
+        setButtonBusy(button, false);
+        $('summaryBackBtn').disabled = false;
+      }
+    }
+
+    function showSubmitSuccess(logNos) {
+      storageRemove(DRAFT_KEY);
+      state.dashboard.loaded = false;
+      // New areas become available for autocomplete straight away.
+      state.entries.forEach((e) => { if (state.areas.indexOf(e.area) === -1) state.areas.push(e.area); });
+      setAreaList(state.areas.sort());
+
+      $('summarySub').textContent = 'Saved to the sheet';
+      $('summaryFoot').classList.add('hidden');
+      $('summaryBody').innerHTML =
+        '<div class="card success-panel">' +
+          '<div class="success-icon" aria-hidden="true">✓</div>' +
+          '<h2 style="margin:0;color:var(--success)">Submitted successfully</h2>' +
+          '<p class="muted">' + logNos.length + ' log' + (logNos.length > 1 ? 's' : '') + ' created:</p>' +
+          '<ul class="logno-list">' + logNos.map((n) => '<li>' + escapeHtml(n) + '</li>').join('') + '</ul>' +
+          '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">' +
+            '<button type="button" class="btn btn-primary" id="newLogBtn">+ Start new log</button>' +
+            '<button type="button" class="btn btn-outline" id="goDashBtn">Open Dashboard</button>' +
+          '</div>' +
+        '</div>';
+      $('newLogBtn').onclick = () => { resetForm(); closeSummary(); window.scrollTo(0, 0); };
+      $('goDashBtn').onclick = () => { resetForm(); closeSummary(); switchView('dashboard'); };
+    }
+
+    function resetForm() {
+      state.entries = [newEntry()];
+      pendingPhotoData.clear();
+      $('draftNotice').classList.add('hidden');
+      renderEntries();
+      renderSubmitErrors([]);
+    }
+
+    /* ================================================================
+       Dashboard
+       ================================================================ */
+    function populateFilterSelects() {
+      const fill = (id, label, values) => {
+        $(id).innerHTML = '<option value="">All</option>' + values.map((v) => '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>').join('');
+        $(id).setAttribute('aria-label', label);
+      };
+      const rows = state.dashboard.rows;
+      const merge = (base, key) => {
+        const set = base.slice();
+        rows.forEach((r) => { if (r[key] && set.indexOf(r[key]) === -1) set.push(r[key]); });
+        return set;
+      };
+      const keep = ['fFloor', 'fStatus', 'fBrand', 'fTonnage'].map((id) => $(id).value);
+      fill('fFloor', 'Floor', merge(state.options.floors, 'floor'));
+      fill('fStatus', 'AC Status', merge(state.options.acStatus, 'acStatus'));
+      fill('fBrand', 'Brand', merge(state.options.brands, 'brand'));
+      fill('fTonnage', 'Tonnage', merge(state.options.tonnage, 'tonnage'));
+      ['fFloor', 'fStatus', 'fBrand', 'fTonnage'].forEach((id, i) => { $(id).value = keep[i] || ''; });
+    }
+
+    // Every open of the Dashboard is a live read of the sheet — nothing stale is ever shown.
+    async function loadDashboard() {
+      const dash = state.dashboard;
+      if (dash.loading) return;
+      dash.loading = true;
+      if (!dash.loaded) $('dashBody').innerHTML = '<div class="card state-box"><div class="spinner"></div>Loading logs…</div>';
+      $('dashUpdated').textContent = 'Refreshing…';
+      try {
+        const response = await callServer('getDashboard', state.token);
+        if (!response.success) throw new Error(response.error);
+        dash.rows = response.rows;
+        dash.loaded = true;
+        dash.error = '';
+        populateFilterSelects();
+        $('dashUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } catch (err) {
+        dash.error = err.message;
+        $('dashUpdated').textContent = '';
+      } finally {
+        dash.loading = false;
+        renderDashboard();
+      }
+    }
+
+    function filteredRows() {
+      const search = $('fSearch').value.trim().toLowerCase();
+      const floor = $('fFloor').value;
+      const status = $('fStatus').value;
+      const brand = $('fBrand').value;
+      const tonnage = $('fTonnage').value;
+      return state.dashboard.rows.filter((r) => (
+        (!floor || r.floor === floor) &&
+        (!status || r.acStatus === status) &&
+        (!brand || r.brand === brand) &&
+        (!tonnage || r.tonnage === tonnage) &&
+        (!search || [r.logNo, r.area, r.floor, r.acStatus, r.brand, r.tonnage, r.remarks, r.enteredBy].join(' ').toLowerCase().indexOf(search) !== -1)
+      ));
+    }
+
+    function renderTiles(rows) {
+      const qtyFor = (fn) => rows.filter(fn).reduce((s, r) => s + (Number(r.qty) || 0), 0);
+      const tiles = [
+        { label: 'Log entries', value: rows.length, small: 'rows shown' },
+        { label: 'Total AC qty', value: qtyFor(() => true), small: 'all statuses' },
+        { label: 'Existing', value: qtyFor((r) => r.acStatus === 'Existing'), small: 'qty' },
+        { label: 'Existing (Dismantle)', value: qtyFor((r) => /dismantle/i.test(r.acStatus)), small: 'qty' },
+        { label: 'New Required', value: qtyFor((r) => r.acStatus === NEW_REQUIRED), small: 'qty' }
+      ];
+      $('dashTiles').innerHTML = tiles.map((t) => (
+        '<div class="card tile"><div class="label">' + escapeHtml(t.label) + '</div><div class="value">' + t.value + '</div><div class="small">' + t.small + '</div></div>'
+      )).join('');
+    }
+
+    function renderDashboard() {
+      const dash = state.dashboard;
+      const body = $('dashBody');
+      if (dash.error && !dash.loaded) {
+        $('dashTiles').innerHTML = '';
+        body.innerHTML = '<div class="card state-box"><p class="notice error">Could not load: ' + escapeHtml(dash.error) +
+          '</p><button type="button" class="btn btn-primary" id="dashRetryBtn">Try again</button></div>';
+        $('dashRetryBtn').onclick = loadDashboard;
+        return;
+      }
+      const rows = filteredRows();
+      renderTiles(rows);
+      if (dash.error) showToast('Refresh failed: ' + dash.error);
+      if (!dash.rows.length) {
+        body.innerHTML = '<div class="card state-box">No logs yet. Entries you submit from the Log tab will appear here.</div>';
+        return;
+      }
+      if (!rows.length) {
+        body.innerHTML = '<div class="card state-box">No logs match these filters.</div>';
+        return;
+      }
+      body.innerHTML = '<div class="table-wrap"><table><thead><tr>' +
+        '<th>Edit</th><th>Log No</th><th>Area / Room No</th><th>Floor</th><th>AC Status</th><th>Brand</th><th>Tonnage</th><th>Qty</th><th>Photo</th><th>Remarks</th><th>Entered By</th><th>Logged At</th>' +
+        '</tr></thead><tbody>' +
+        rows.map((r) => (
+          '<tr>' +
+            '<td><button type="button" class="btn btn-outline" style="padding:6px 12px" data-edit-log="' + escapeHtml(r.logNo) + '">✏️ Edit</button></td>' +
+            '<td style="white-space:nowrap;font-weight:600">' + escapeHtml(r.logNo) + '</td>' +
+            '<td>' + escapeHtml(r.area) + '</td>' +
+            '<td>' + escapeHtml(r.floor) + '</td>' +
+            '<td>' + statusPill(r.acStatus) + '</td>' +
+            '<td>' + escapeHtml(r.brand || '—') + '</td>' +
+            '<td style="white-space:nowrap">' + escapeHtml(r.tonnage) + '</td>' +
+            '<td class="num">' + escapeHtml(r.qty) + '</td>' +
+            '<td>' + (r.photos.length ? r.photos.map((p, i) => '<a class="photo-link" href="' + escapeHtml(p.url) + '" target="_blank" rel="noopener">📷 ' + (i + 1) + '</a>').join('') : '<span class="muted">—</span>') + '</td>' +
+            '<td>' + escapeHtml(r.remarks) + '</td>' +
+            '<td class="muted" style="font-size:13px">' + escapeHtml(r.enteredBy) + '</td>' +
+            '<td class="muted" style="font-size:13px;white-space:nowrap">' + escapeHtml(r.loggedAt) +
+              (r.lastEditedAt ? '<br><span title="Last edited by ' + escapeHtml(r.lastEditedBy) + '">edited ' + escapeHtml(r.lastEditedAt) + '</span>' : '') + '</td>' +
+          '</tr>'
+        )).join('') + '</tbody></table></div>';
+    }
+
+    function exportCsv() {
+      const rows = filteredRows();
+      if (!rows.length) { showToast('Nothing to export.'); return; }
+      const headers = ['Log No', 'Area/Room No', 'Floor', 'AC Status', 'Brand', 'Tonnage', 'Qty', 'Photo', 'Remarks', 'Entered By', 'Logged At'];
+      const quote = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const lines = [headers.map(quote).join(',')].concat(rows.map((r) => [
+        r.logNo, r.area, r.floor, r.acStatus, r.brand, r.tonnage, r.qty, r.photos.map((p) => p.url).join(' '), r.remarks, r.enteredBy, r.loggedAt
+      ].map(quote).join(',')));
+      const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'dr-jssh-existing-log.csv';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+
+    /* ---------- Dashboard edit ---------- */
+    function openEdit(logNo) {
+      const row = state.dashboard.rows.find((r) => r.logNo === logNo);
+      if (!row) return;
+      const opts = state.options;
+      const entry = {
+        id: 'edit' + uid(), area: row.area, floor: row.floor, acStatus: row.acStatus, brand: row.brand,
+        tonnage: row.tonnage, qty: row.qty, remarks: row.remarks,
+        photos: row.photos.map((p) => ({ localId: uid(), fileId: p.fileId, url: p.url, preview: '', status: 'saved', existing: true })),
+        other: {
+          floor: !!row.floor && opts.floors.indexOf(row.floor) === -1,
+          brand: !!row.brand && opts.brands.indexOf(row.brand) === -1,
+          tonnage: !!row.tonnage && opts.tonnage.indexOf(row.tonnage) === -1
+        },
+        logNo: row.logNo
+      };
+      state.editing = entry;
+      state.editingOriginal = row;
+      $('editTitle').textContent = 'Edit ' + row.logNo;
+      $('editSub').textContent = 'Logged ' + row.loggedAt + (row.enteredBy ? ' by ' + row.enteredBy : '');
+      $('editBody').innerHTML = '<div id="editError" class="notice error hidden" role="alert"></div><div class="card" style="padding:16px" id="editFields">' + entryFieldsHtml(entry) + '</div>';
+      $('editOverlay').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeEdit() {
+      $('editOverlay').classList.add('hidden');
+      document.body.style.overflow = '';
+      state.editing = null;
+      state.editingOriginal = null;
+    }
+
+    async function saveEdit() {
+      const entry = state.editing;
+      const original = state.editingOriginal;
+      const errors = validateEntry(entry);
+      markFieldErrors($('editFields'), false, errors);
+      if (errors.length) {
+        showNotice($('editError'), 'error', errors.map((e) => FIELD_LABELS[e.field] + ': ' + e.message).join('  •  '));
+        return;
+      }
+      const changes = {};
+      ['area', 'floor', 'acStatus', 'brand', 'tonnage', 'remarks'].forEach((key) => {
+        if (String(entry[key]).trim() !== String(original[key]).trim()) changes[key] = entry[key];
+      });
+      if (Number(entry.qty) !== Number(original.qty)) changes.qty = Number(entry.qty);
+      const newIds = entry.photos.map((p) => p.fileId).join(',');
+      const oldIds = original.photos.map((p) => p.fileId).join(',');
+      if (newIds !== oldIds) changes.photos = entry.photos.map((p) => ({ fileId: p.fileId }));
+
+      if (!Object.keys(changes).length) { closeEdit(); showToast('No changes to save.'); return; }
+
+      const button = $('editSaveBtn');
+      setButtonBusy(button, true, 'Saving…');
+      try {
+        const response = await callServer('updateLog', state.token, original.logNo, changes);
+        if (!response.success) throw new Error(response.error);
+        const index = state.dashboard.rows.findIndex((r) => r.logNo === original.logNo);
+        if (index !== -1) state.dashboard.rows[index] = response.row;
+        closeEdit();
+        populateFilterSelects();
+        renderDashboard();
+        showToast('Saved ' + response.row.logNo + ' (' + response.row.changedCount + ' change' + (response.row.changedCount === 1 ? '' : 's') + ').');
+      } catch (err) {
+        if (!state.token) return;
+        showNotice($('editError'), 'error', err.message);
+      } finally {
+        setButtonBusy(button, false);
+      }
+    }
+
+    /* ================================================================
+       Wiring
+       ================================================================ */
+    function wireEvents() {
+      $('emailForm').addEventListener('submit', sendCode);
+      $('codeForm').addEventListener('submit', verifyCode);
+      $('resendBtn').addEventListener('click', () => { $('signinEmail').value = pendingEmail; sendCode({ preventDefault() {}, type: 'click' }); });
+      $('changeEmailBtn').addEventListener('click', () => showSignIn());
+      $('signinCode').addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+        if (e.target.value.length === 6) $('codeForm').requestSubmit();
+      });
+      $('signOutBtn').addEventListener('click', async () => { if (await askConfirm('Sign out of this device?', 'Sign out')) signOut(); });
+
+      document.querySelectorAll('.nav-btn').forEach((b) => b.addEventListener('click', () => switchView(b.dataset.view)));
+      $('refreshAreasBtn').addEventListener('click', refreshAreaList);
+
+      ['entries', 'editOverlay'].forEach((id) => {
+        const root = $(id);
+        // Radios and file pickers are handled on 'change' only, so they aren't processed twice.
+        root.addEventListener('input', (e) => {
+          if (e.target.type !== 'radio' && e.target.type !== 'file') handleFieldInput(e);
+        });
+        root.addEventListener('change', (e) => {
+          if (e.target.dataset.file) handleFileChange(e);
+          else if (e.target.type === 'radio') handleFieldInput(e);
+        });
+        root.addEventListener('click', handleClick);
+      });
+
+      $('addEntryBtn').addEventListener('click', () => {
+        const last = state.entries[state.entries.length - 1];
+        const entry = newEntry();
+        // Most surveys go room by room on one floor, so carry the floor forward.
+        if (last && last.floor) { entry.floor = last.floor; entry.other.floor = last.other.floor; }
+        state.entries.push(entry);
+        renderEntries();
+        saveDraftSoon();
+        jumpToField(entry.id, 'area');
+      });
+
+      $('reviewBtn').addEventListener('click', openSummary);
+      $('submitErrors').addEventListener('click', (e) => {
+        const link = e.target.closest('[data-jump-entry]');
+        if (link) jumpToField(link.dataset.jumpEntry, link.dataset.jumpField);
+      });
+
+      $('summaryBody').addEventListener('click', (e) => {
+        const button = e.target.closest('[data-summary-edit]');
+        if (button) closeSummary(button.dataset.summaryEdit);
+      });
+      $('summaryBackBtn').addEventListener('click', () => closeSummary());
+      $('summaryCloseBtn').addEventListener('click', () => {
+        if ($('summaryFoot').classList.contains('hidden')) resetForm();
+        closeSummary();
+      });
+      $('confirmSubmitBtn').addEventListener('click', confirmSubmit);
+
+      $('dashRefreshBtn').addEventListener('click', loadDashboard);
+      $('csvBtn').addEventListener('click', exportCsv);
+      ['fSearch', 'fFloor', 'fStatus', 'fBrand', 'fTonnage'].forEach((id) => $(id).addEventListener('input', renderDashboard));
+      $('clearFiltersBtn').addEventListener('click', () => {
+        ['fSearch', 'fFloor', 'fStatus', 'fBrand', 'fTonnage'].forEach((id) => { $(id).value = ''; });
+        renderDashboard();
+      });
+      $('dashBody').addEventListener('click', (e) => {
+        const button = e.target.closest('[data-edit-log]');
+        if (button) openEdit(button.dataset.editLog);
+      });
+      $('editSaveBtn').addEventListener('click', saveEdit);
+      $('editCancelBtn').addEventListener('click', closeEdit);
+      $('editCloseBtn').addEventListener('click', closeEdit);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        if (!$('editOverlay').classList.contains('hidden')) closeEdit();
+        else if (!$('summaryOverlay').classList.contains('hidden') && !$('summaryFoot').classList.contains('hidden')) closeSummary();
+      });
+    }
+
+    function init() {
+      wireEvents();
+      const saved = storageGet(SESSION_KEY);
+      if (saved) {
+        try {
+          const session = JSON.parse(saved);
+          state.token = session.token;
+          if (session.user) $('userName').textContent = session.user.name;
+          loadApp();
+          return;
+        } catch (err) {
+          storageRemove(SESSION_KEY);
+        }
+      }
+      showSignIn();
+    }
+
+    init();
+  </script>
+</body>
+</html>
