@@ -57,8 +57,11 @@ button, the dashboard filters and edit, and that the edit appears in `Dashboard 
 - LOW: the dashboard reads the whole Log tab on each open. Fine to a few thousand rows.
 
 ## History (newest first)
+- 21 Nov 2026: owner completed first-run authorization; /exec loads the sign-in screen.
 - 21 Nov 2026: v1 built, project created bound to the Sheet with clasp, deployed @1, onboarded to GitHub (Claude).
 
 ## Next recommended action
-Owner opens the public URL once as director@ and clicks Allow (first-run authorization), then adds team emails to EON_Team.
+Owner signs in once (this creates the EON_Team tab with director@), then adds team emails to EON_Team.
+Share the domain-form link: https://script.google.com/a/macros/eonsales.in/s/AKfycbz6c7fE2jU91q-p4huOfOcNHv4nMXaXUCyHZTsHZ89ZgpuY1QGHz9Gnix5U-_cWjhlJ/exec
+(the plain /macros/s/ form returns a Drive 404 when several Google accounts are signed in).
 Possible next updates (through EON Update App): void/delete a log, floor-wise summary, cleanup of pending photos.
