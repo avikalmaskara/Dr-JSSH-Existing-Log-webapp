@@ -278,7 +278,7 @@
         </div>
         <div class="user-box">
           <span id="userName"></span>
-          <button type="button" id="signOutBtn" class="link-btn">Sign out</button>
+          <button type="button" id="setNameBtn" class="link-btn">Set name</button>
         </div>
       </div>
       <nav class="nav" aria-label="Main">
@@ -596,6 +596,25 @@
       }
     }
 
+    /* Open access: no sign-in. A visitor is a guest; their optional name is kept on this device. */
+    const GUEST_NAME_KEY = 'jssh_guest_name_v1';
+    function guestToken() {
+      return 'guest:' + (storageGet(GUEST_NAME_KEY) || '');
+    }
+    function changeGuestName() {
+      const current = storageGet(GUEST_NAME_KEY) || '';
+      const typed = window.prompt('Your name (shown as "Entered By" on your logs):', current);
+      if (typed === null) return;
+      const name = typed.replace(/\s+/g, ' ').trim().slice(0, 60);
+      if (name) storageSet(GUEST_NAME_KEY, name); else storageRemove(GUEST_NAME_KEY);
+      if (state.user && state.user.guest) {
+        state.token = guestToken();
+        state.user.name = name || 'Guest';
+        $('userName').textContent = state.user.name;
+      }
+      showToast(name ? 'Name saved.' : 'Name cleared.');
+    }
+
     function signOut() {
       storageRemove(SESSION_KEY);
       state.token = null;
@@ -603,12 +622,11 @@
       showSignIn();
     }
 
+    // Open access: an old/invalid session just falls back to guest instead of showing a sign-in page.
     function handleAuthFailure(message) {
       storageRemove(SESSION_KEY);
-      state.token = null;
-      $('summaryOverlay').classList.add('hidden');
-      $('editOverlay').classList.add('hidden');
-      showSignIn(message || 'Please sign in again.');
+      state.token = guestToken();
+      showToast(message || 'Please try again.');
     }
 
     /* ================================================================
@@ -626,6 +644,7 @@
         state.options = response.options;
         setAreaList(response.areas);
         $('userName').textContent = response.user.name;
+        $('setNameBtn').classList.toggle('hidden', !response.user.guest);
         $('bootView').classList.add('hidden');
         $('appView').classList.remove('hidden');
         restoreDraftOrStartFresh();
@@ -1439,7 +1458,7 @@
         e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
         if (e.target.value.length === 6) $('codeForm').requestSubmit();
       });
-      $('signOutBtn').addEventListener('click', async () => { if (await askConfirm('Sign out of this device?', 'Sign out')) signOut(); });
+      $('setNameBtn').addEventListener('click', changeGuestName);
 
       document.querySelectorAll('.nav-btn').forEach((b) => b.addEventListener('click', () => switchView(b.dataset.view)));
       $('refreshAreasBtn').addEventListener('click', refreshAreaList);
@@ -1521,7 +1540,8 @@
           storageRemove(SESSION_KEY);
         }
       }
-      showSignIn();
+      state.token = guestToken();
+      loadApp();
     }
 
     init();

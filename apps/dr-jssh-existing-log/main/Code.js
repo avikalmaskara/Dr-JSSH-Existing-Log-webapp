@@ -180,7 +180,7 @@ function uploadPhoto(token, photo) {
     if (bytes.length > CONFIG.MAX_PHOTO_BYTES) throw userError_('Photo is too large even after compression.');
 
     const stamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd-HHmmss');
-    const name = 'pending_' + stamp + '_' + member.email.split('@')[0] + '.jpg';
+    const name = 'pending_' + stamp + '_' + (member.email ? member.email.split('@')[0] : 'link') + '.jpg';
     const file = getPendingFolder_().createFile(Utilities.newBlob(bytes, mimeType, name));
 
     let sharingWarning = '';
@@ -246,7 +246,7 @@ function submitLog(token, payload) {
         const record = Object.assign({}, entry, {
           logNo: logNos[index],
           photos: photoCellValue_(entry.photos),
-          enteredBy: member.name ? member.name + ' (' + member.email + ')' : member.email,
+          enteredBy: memberLabel_(member),
           loggedAt: now
         });
         return buildRow_(record, columnMap, lastColumn);
@@ -321,7 +321,7 @@ function updateLog(token, logNo, changes) {
       const clean = result.clean;
       newPhotos = clean.photos.filter(function (p) { return currentPhotoIds.indexOf(p.fileId) === -1; });
 
-      const editor = member.name ? member.name + ' (' + member.email + ')' : member.email;
+      const editor = memberLabel_(member);
       const now = new Date();
       const auditRows = [];
       EDITABLE_KEYS.forEach(function (key) {
@@ -719,7 +719,21 @@ function findMember_(email) {
 }
 
 function publicUser_(member) {
-  return { name: member.name || member.email, email: member.email, role: member.role || '' };
+  return { name: member.name || member.email, email: member.email, role: member.role || '', guest: !!member.guest };
+}
+
+// What goes in Entered By / Last Edited By / Edited By.
+function memberLabel_(member) {
+  if (member.guest) return member.name + ' (via link)';
+  return member.name ? member.name + ' (' + member.email + ')' : member.email;
+}
+
+// Open access (no sign-in): anyone with the link is a guest. The browser sends "guest:<name>"
+// where <name> is whatever the person typed in "Your name" (optional).
+function guestMember_(token) {
+  const raw = String(token || '');
+  const name = raw.indexOf('guest:') === 0 ? cleanText_(raw.slice(6), 60) : '';
+  return { email: '', name: name || 'Guest', role: '', guest: true };
 }
 
 function getSecret_() {
@@ -739,8 +753,19 @@ function signToken_(email) {
   return body + '.' + signature;
 }
 
-// Runs on every call: signature, expiry, AND live EON_Team membership.
+// Open access: there is no sign-in page any more. A valid old session token still identifies the
+// team member (so their name/email keeps showing in Entered By); anything else is a guest.
 function authenticate_(token) {
+  try {
+    return authenticateSession_(token);
+  } catch (err) {
+    if (err && err.isAuthError) return guestMember_(token);
+    throw err;
+  }
+}
+
+// Original check: signature, expiry, AND live EON_Team membership.
+function authenticateSession_(token) {
   const parts = String(token || '').split('.');
   if (parts.length !== 2) throw authError_('Please sign in.');
   const expected = Utilities.base64EncodeWebSafe(Utilities.computeHmacSha256Signature(parts[0], getSecret_()));
